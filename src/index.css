@@ -1,0 +1,154 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Bodoni Moda", Georgia, serif;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Space Mono", monospace;
+
+  --color-oxblood: #651D32;
+  --color-parchment: #F4EBDD;
+  --color-gold: #D7B46A;
+  --color-ink: #211A1B;
+  --color-ivory: #FBF7F0;
+  --color-rose: #C98D96;
+}
+
+:root {
+  --oxblood: #651D32;
+  --parchment: #F4EBDD;
+  --gold: #D7B46A;
+  --ink: #211A1B;
+  --ivory: #FBF7F0;
+  --rose: #C98D96;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  font-family: var(--font-sans), sans-serif;
+  background-color: #F4EBDD;
+  color: #211A1B;
+  overflow-x: hidden;
+}
+
+/* Hard Neo-brutalist shadows */
+.brutal-border {
+  border: 3px solid #211A1B;
+}
+
+.brutal-border-4 {
+  border: 4px solid #211A1B;
+}
+
+.brutal-shadow-sm {
+  box-shadow: 2px 2px 0 #211A1B;
+}
+
+.brutal-shadow {
+  box-shadow: 4px 4px 0 #211A1B;
+}
+
+.brutal-shadow-lg {
+  box-shadow: 6px 6px 0 #211A1B;
+}
+
+.brutal-shadow-xl {
+  box-shadow: 8px 8px 0 #211A1B;
+}
+
+.brutal-shadow-oxblood {
+  box-shadow: 6px 6px 0 #651D32;
+}
+
+.brutal-shadow-gold {
+  box-shadow: 6px 6px 0 #D7B46A;
+}
+
+/* Tactile button interaction */
+.brutal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #211A1B;
+  box-shadow: 4px 4px 0 #211A1B;
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.brutal-btn:hover {
+  transform: translate(-1.5px, -1.5px);
+  box-shadow: 5.5px 5.5px 0 #211A1B;
+}
+
+.brutal-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #211A1B;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #651D32;
+  outline-offset: 2px;
+}
+
+/* Halftone / polka-dot background pattern */
+.bg-halftone {
+  background-image: radial-gradient(#211A1B 1.25px, transparent 1.25px);
+  background-size: 24px 24px;
+}
+
+.bg-halftone-muted {
+  background-image: radial-gradient(rgba(33, 26, 27, 0.22) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+/* Marker underline / highlight */
+.marker-highlight {
+  position: relative;
+  display: inline-block;
+}
+
+.marker-highlight::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: 8%;
+  height: 42%;
+  background-color: #D7B46A;
+  opacity: 0.7;
+  z-index: -1;
+  transform: rotate(-1deg);
+  border-radius: 2px;
+}
+
+.marker-highlight-rose::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: 8%;
+  height: 42%;
+  background-color: #C98D96;
+  opacity: 0.65;
+  z-index: -1;
+  transform: rotate(1deg);
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
