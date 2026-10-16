@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: '/SWALIHAPORTFOLIO/',,
+    base: '/SWALIHAPORTFOLIO/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
