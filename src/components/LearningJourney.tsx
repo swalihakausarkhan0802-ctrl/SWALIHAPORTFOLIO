@@ -90,7 +90,20 @@ const JOURNEY_STAGES: JourneyStage[] = [
 ];
 
 export const LearningJourney: React.FC = () => {
-  const [activeStage, setActiveStage] = useState<number>(0);
+  // Allow toggling stages individually with stage 0 & 3 expanded initially
+  const [expandedStages, setExpandedStages] = useState<Record<number, boolean>>({
+    0: true,
+    1: false,
+    2: false,
+    3: true,
+  });
+
+  const toggleStage = (index: number) => {
+    setExpandedStages((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
+  };
 
   return (
     <section id="journey" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F4EBDD] border-t-3 border-[#211A1B]">
@@ -116,27 +129,31 @@ export const LearningJourney: React.FC = () => {
         {/* Annotated Notebook Timeline / Editorial List */}
         <div className="space-y-6">
           {JOURNEY_STAGES.map((stage, index) => {
-            const isSelected = activeStage === index;
+            const isExpanded = !!expandedStages[index];
             const isFuture = stage.status === 'FORWARD HORIZON';
 
             return (
               <div
                 key={stage.number}
-                onClick={() => setActiveStage(index)}
-                className={`group bg-[#FBF7F0] brutal-border transition-all duration-150 cursor-pointer overflow-hidden ${
-                  isSelected
+                className={`group bg-[#FBF7F0] brutal-border transition-all duration-150 overflow-hidden ${
+                  isExpanded
                     ? 'brutal-shadow-oxblood -translate-y-0.5'
                     : 'brutal-shadow hover:brutal-shadow-lg'
                 }`}
               >
                 {/* Stage Header Strip */}
-                <div className="p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#211A1B]/15">
+                <button
+                  type="button"
+                  onClick={() => toggleStage(index)}
+                  className="w-full text-left p-6 sm:p-7 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#211A1B]/15 hover:bg-[#F4EBDD]/40 transition-colors cursor-pointer"
+                  aria-expanded={isExpanded}
+                >
                   <div className="flex items-center gap-4">
                     {/* Number Stamp */}
                     <div
                       className="w-12 h-12 brutal-border brutal-shadow-sm flex items-center justify-center font-serif font-black text-xl shrink-0"
                       style={{
-                        backgroundColor: isSelected ? '#651D32' : '#211A1B',
+                        backgroundColor: isExpanded ? '#651D32' : '#211A1B',
                         color: '#FBF7F0',
                       }}
                     >
@@ -167,18 +184,19 @@ export const LearningJourney: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 self-end md:self-auto">
                     <span className="font-mono text-xs font-bold text-[#211A1B]/70 uppercase hidden sm:inline">
-                      {isSelected ? 'ACTIVE VIEW' : 'EXPAND STAGE'}
+                      {isExpanded ? 'COLLAPSE STAGE' : 'EXPAND STAGE'}
                     </span>
-                    <div className="w-8 h-8 rounded-none bg-[#F4EBDD] brutal-border flex items-center justify-center font-mono text-sm font-bold group-hover:bg-[#D7B46A] transition-colors">
-                      {isSelected ? '−' : '+'}
+                    <div className="w-8 h-8 bg-[#F4EBDD] brutal-border flex items-center justify-center font-mono text-sm font-bold group-hover:bg-[#D7B46A] transition-colors">
+                      {isExpanded ? '−' : '+'}
                     </div>
                   </div>
-                </div>
+                </button>
 
                 {/* Body Content */}
-                <div className="p-6 sm:p-7 space-y-6">
+                {isExpanded && (
+                  <div className="p-6 sm:p-7 space-y-6 animate-fadeIn">
                   {/* Headline Statement */}
                   <p className="font-sans font-bold text-lg text-[#211A1B] leading-snug">
                     {stage.headline}
@@ -217,6 +235,7 @@ export const LearningJourney: React.FC = () => {
                     <p>&ldquo;{stage.perspective}&rdquo;</p>
                   </div>
                 </div>
+                )}
               </div>
             );
           })}

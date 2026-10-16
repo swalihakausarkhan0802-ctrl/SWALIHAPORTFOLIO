@@ -155,10 +155,33 @@ export const Projects: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'ai-systems' | 'web-ai'>('all');
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
 
+  // Keyboard navigation & body scroll lock for modal
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedProject(null);
+      }
+    };
+    if (selectedProject) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedProject]);
+
   const filteredProjects =
     activeFilter === 'all'
       ? PROJECTS_DATA
       : PROJECTS_DATA.filter((project) => project.category === activeFilter);
+
+  const allCount = PROJECTS_DATA.length;
+  const aiSystemsCount = PROJECTS_DATA.filter((p) => p.category === 'ai-systems').length;
+  const webAiCount = PROJECTS_DATA.filter((p) => p.category === 'web-ai').length;
 
   return (
     <section id="projects" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F4EBDD] border-t-3 border-[#211A1B]">
@@ -192,7 +215,7 @@ export const Projects: React.FC = () => {
                 : 'text-[#211A1B] hover:bg-[#F4EBDD]'
             }`}
           >
-            All Works ({PROJECTS_DATA.length})
+            All Works ({allCount})
           </button>
           <button
             type="button"
@@ -203,7 +226,7 @@ export const Projects: React.FC = () => {
                 : 'text-[#211A1B] hover:bg-[#F4EBDD]'
             }`}
           >
-            AI &amp; Systems Engineering (1)
+            AI &amp; Systems Engineering ({aiSystemsCount})
           </button>
           <button
             type="button"
@@ -214,7 +237,7 @@ export const Projects: React.FC = () => {
                 : 'text-[#211A1B] hover:bg-[#F4EBDD]'
             }`}
           >
-            Web &amp; Applied AI (2)
+            Web &amp; Applied AI ({webAiCount})
           </button>
         </div>
 
@@ -386,6 +409,9 @@ export const Projects: React.FC = () => {
         {/* Modal / Deep Dive Dialog */}
         {selectedProject && (
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="project-modal-title"
             className="fixed inset-0 z-50 bg-[#211A1B]/65 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
             onClick={() => setSelectedProject(null)}
           >
@@ -410,7 +436,7 @@ export const Projects: React.FC = () => {
                       {selectedProject.categoryLabel}
                     </span>
                   </div>
-                  <h3 className="font-serif font-black text-2xl sm:text-3xl text-[#211A1B] mt-2">
+                  <h3 id="project-modal-title" className="font-serif font-black text-2xl sm:text-3xl text-[#211A1B] mt-2">
                     {selectedProject.title}
                   </h3>
                   <p className="font-sans font-bold text-xs text-[#651D32] uppercase tracking-wider mt-0.5">

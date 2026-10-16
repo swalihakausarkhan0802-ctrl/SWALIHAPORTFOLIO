@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SparkleStar } from './illustrations/DecorativeElements';
 import { Code2, Globe, Wrench, Check, ArrowRight, Sparkles, Terminal, Layers } from 'lucide-react';
 
@@ -185,10 +185,40 @@ export const Skills: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'programming' | 'web' | 'tools'>('all');
   const [selectedSkill, setSelectedSkill] = useState<SkillItem | null>(null);
 
+  // Keyboard navigation & body scroll lock for modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setSelectedSkill(null);
+      }
+    };
+    if (selectedSkill) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedSkill]);
+
   const displayedCategories =
     activeTab === 'all'
       ? SKILLS_BY_CATEGORY
       : SKILLS_BY_CATEGORY.filter((c) => c.category === activeTab);
+
+  const programmingCount =
+    SKILLS_BY_CATEGORY.find((c) => c.category === 'programming')?.skills.length ?? 3;
+  const webCount =
+    SKILLS_BY_CATEGORY.find((c) => c.category === 'web')?.skills.length ?? 2;
+  const toolsCount =
+    SKILLS_BY_CATEGORY.find((c) => c.category === 'tools')?.skills.length ?? 3;
+  const totalSkillsCount = SKILLS_BY_CATEGORY.reduce(
+    (acc, cat) => acc + cat.skills.length,
+    0
+  );
 
   return (
     <section id="skills" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F4EBDD] border-t-3 border-[#211A1B]">
@@ -222,7 +252,7 @@ export const Skills: React.FC = () => {
                 : 'text-[#211A1B] hover:bg-[#F4EBDD]'
             }`}
           >
-            All Panels (3)
+            All Skills ({totalSkillsCount})
           </button>
           <button
             type="button"
@@ -233,7 +263,7 @@ export const Skills: React.FC = () => {
                 : 'text-[#211A1B] hover:bg-[#F4EBDD]'
             }`}
           >
-            Programming (4)
+            Programming ({programmingCount})
           </button>
           <button
             type="button"
@@ -244,7 +274,7 @@ export const Skills: React.FC = () => {
                 : 'text-[#211A1B] hover:bg-[#F4EBDD]'
             }`}
           >
-            Web (2)
+            Web ({webCount})
           </button>
           <button
             type="button"
@@ -255,7 +285,7 @@ export const Skills: React.FC = () => {
                 : 'text-[#211A1B] hover:bg-[#F4EBDD]'
             }`}
           >
-            Tools (3)
+            Tools ({toolsCount})
           </button>
         </div>
 
@@ -370,6 +400,9 @@ export const Skills: React.FC = () => {
         {/* Modal / Inspection Dialog when a skill is clicked */}
         {selectedSkill && (
           <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="skill-modal-title"
             className="fixed inset-0 z-50 bg-[#211A1B]/65 backdrop-blur-xs flex items-center justify-center p-4"
             onClick={() => setSelectedSkill(null)}
           >
@@ -382,7 +415,7 @@ export const Skills: React.FC = () => {
                   <span className="font-mono text-xs font-bold uppercase tracking-wider text-[#651D32]">
                     TOOLKIT DEEP DIVE // {selectedSkill.categoryLabel}
                   </span>
-                  <h3 className="font-serif font-black text-3xl text-[#211A1B] mt-1">
+                  <h3 id="skill-modal-title" className="font-serif font-black text-3xl text-[#211A1B] mt-1">
                     {selectedSkill.name}
                   </h3>
                   <p className="font-sans font-medium text-xs text-[#211A1B]/75 uppercase tracking-wide">

@@ -10,8 +10,17 @@ export const Navbar: React.FC = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, []);
 
   const navLinks = [
@@ -25,9 +34,19 @@ export const Navbar: React.FC = () => {
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setMobileMenuOpen(false);
+    if (href === '#' || href === '') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     const target = document.querySelector(href);
     if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+      const navHeight = 82;
+      const elementPosition = target.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
     }
   };
 
@@ -41,7 +60,8 @@ export const Navbar: React.FC = () => {
         {/* Zone 1: Brand Wordmark with Monogram Seal */}
         <a
           href="#"
-          className="flex items-center gap-3 group text-[#211A1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#651D32] focus-visible:ring-offset-2 shrink-0"
+          onClick={(e) => handleLinkClick(e, '#')}
+          className="flex items-center gap-3 group text-[#211A1B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#651D32] focus-visible:ring-offset-2 shrink-0 cursor-pointer"
           aria-label="Swaliha Khan - Home"
         >
           <div className="w-10 h-10 rounded-sm bg-[#651D32] text-[#FBF7F0] brutal-border brutal-shadow-sm flex items-center justify-center font-serif font-black text-lg group-hover:-translate-y-0.5 group-hover:bg-[#211A1B] transition-all">

@@ -26,21 +26,69 @@ export const Hero: React.FC = () => {
     }
   }, []);
 
+  // Handle keyboard Escape and lock body scroll when photo modal is active
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPhotoModalOpen(false);
+      }
+    };
+    if (photoModalOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [photoModalOpen]);
+
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        setUserUploadedPhoto(result);
-        try {
-          localStorage.setItem('swaliha_original_photo', result);
-        } catch {
-          // Fallback if quota exceeded
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        // Safe resize to prevent exceeding 5MB localStorage limits
+        const maxDim = 1200;
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', 0.9);
+          setUserUploadedPhoto(compressed);
+          try {
+            localStorage.setItem('swaliha_original_photo', compressed);
+          } catch {
+            // Ignore quota errors if storage full
+          }
+        } else {
+          const raw = reader.result as string;
+          setUserUploadedPhoto(raw);
+          try {
+            localStorage.setItem('swaliha_original_photo', raw);
+          } catch {}
         }
       };
-      reader.readAsDataURL(file);
-    }
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleRemovePhoto = (e: React.MouseEvent) => {
@@ -56,7 +104,15 @@ export const Hero: React.FC = () => {
 
   const scrollTo = (href: string) => {
     const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (el) {
+      const navHeight = 84;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - navHeight;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth',
+      });
+    }
   };
 
   return (
@@ -287,6 +343,9 @@ export const Hero: React.FC = () => {
       {/* Full Resolution Photo Modal */}
       {photoModalOpen && userUploadedPhoto && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="photo-modal-title"
           className="fixed inset-0 z-50 bg-[#211A1B]/85 backdrop-blur-xs flex items-center justify-center p-4"
           onClick={() => setPhotoModalOpen(false)}
         >
@@ -299,7 +358,7 @@ export const Hero: React.FC = () => {
                 <span className="font-mono text-xs font-bold uppercase text-[#651D32]">
                   ORIGINAL UNMODIFIED PHOTO
                 </span>
-                <h3 className="font-serif font-black text-2xl text-[#211A1B]">
+                <h3 id="photo-modal-title" className="font-serif font-black text-2xl text-[#211A1B]">
                   Swaliha Kausar Khan
                 </h3>
               </div>

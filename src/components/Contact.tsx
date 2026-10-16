@@ -120,26 +120,54 @@ export const Contact: React.FC = () => {
     }, 300);
   };
 
-  const handleCopy = () => {
+  const safeCopyToClipboard = async (text: string): Promise<boolean> => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch {
+      // Fall through to fallback
+    }
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const success = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return success;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleCopy = async () => {
     if (!submittedDispatch) return;
     const formatted = `From: ${submittedDispatch.name} (${submittedDispatch.email})
 Subject: ${submittedDispatch.subject}
 ----------------------------------------
 ${submittedDispatch.message}`;
 
-    navigator.clipboard.writeText(formatted).then(() => {
+    const ok = await safeCopyToClipboard(formatted);
+    if (ok) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
-    });
+    }
   };
 
-  const handleCopyEmail = (e: React.MouseEvent) => {
+  const handleCopyEmail = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    navigator.clipboard.writeText(verifiedEmail).then(() => {
+    const ok = await safeCopyToClipboard(verifiedEmail);
+    if (ok) {
       setEmailCopied(true);
       setTimeout(() => setEmailCopied(false), 2000);
-    });
+    }
   };
 
   const handleMailto = () => {
@@ -148,7 +176,18 @@ ${submittedDispatch.message}`;
     const bodyEncoded = encodeURIComponent(
       `Hello Swaliha,\n\n${submittedDispatch.message}\n\n--\nSent by ${submittedDispatch.name} (${submittedDispatch.email})`
     );
-    window.location.href = `mailto:${verifiedEmail}?subject=${subjectEncoded}&body=${bodyEncoded}`;
+    const mailtoUrl = `mailto:${verifiedEmail}?subject=${subjectEncoded}&body=${bodyEncoded}`;
+    try {
+      const link = document.createElement('a');
+      link.href = mailtoUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      window.location.href = mailtoUrl;
+    }
   };
 
   const handleReset = () => {
